@@ -109,7 +109,7 @@ function Home() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
               </span>
-              ETHGlobal Hackathon Submission
+              Network School × Arkiv Hackathon
             </motion.div>
             
             <motion.h1 variants={fadeIn} className="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.1]">
