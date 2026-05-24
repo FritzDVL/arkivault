@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "CGBeaP1coKeMqFDd9UVFc"
+uri = "file://artifacts/landing/src/assets/images/note-graph.png"
+type = "image"
+title = "Abstract knowledge graph connecting nodes"
+
+[[generated]]
+id = "K-xgGOGI5EQJaMlw0z0Nj"
+uri = "file://artifacts/landing/src/assets/images/vault-bg.png"
+type = "image"
+title = "Abstract geometric vault structure"
