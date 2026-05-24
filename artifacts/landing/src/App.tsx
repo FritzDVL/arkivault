@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import NotFound from "@/pages/not-found";
+import ObsidianLogo from "@assets/obsidian-logo.svg";
 import ArkivLogo from "@assets/arkiv-logo.svg";
 
 const queryClient = new QueryClient();
@@ -50,8 +51,9 @@ function Home() {
       <nav className="fixed top-0 w-full border-b border-border/50 bg-background/80 backdrop-blur-md z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src={ArkivLogo} alt="Arkiv" className="h-6" />
-            <span className="font-bold text-lg tracking-tight">Arkivault</span>
+            <img src={ObsidianLogo} alt="Obsidian" className="h-6 w-6" />
+            <span className="font-bold text-lg tracking-tight">On-Chain Second Brain</span>
+            <span className="hidden md:inline-block text-[10px] font-mono uppercase tracking-wider text-muted-foreground border border-border rounded-sm px-1.5 py-0.5 ml-1">Obsidian Plugin</span>
           </div>
           <div className="flex items-center gap-6 text-sm">
             <a href="#architecture" className="hidden md:block hover:text-primary transition-colors font-mono uppercase text-xs">Architecture</a>
@@ -81,8 +83,8 @@ function Home() {
             </motion.div>
             
             <motion.h1 variants={fadeIn} className="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.1]">
-              A SECOND BRAIN <br />
-              <span className="text-primary">WITH NO SERVER.</span>
+              ON-CHAIN <br />
+              <span className="text-primary">SECOND BRAIN.</span>
             </motion.h1>
             
             <motion.p variants={fadeIn} className="text-lg md:text-xl text-muted-foreground max-w-3xl leading-relaxed">
@@ -288,7 +290,7 @@ const notes = result.entities.map(e =>
       <section id="waitlist" className="py-32 px-6">
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <h2 className="text-4xl md:text-5xl font-bold">CLAIM YOUR VAULT</h2>
-          <p className="text-muted-foreground font-mono text-sm">Join the early access waitlist to try the Arkivault beta on the Braga testnet.</p>
+          <p className="text-muted-foreground font-mono text-sm">Join the early access waitlist for the Obsidian plugin beta on the Arkiv Braga testnet.</p>
           
           <form onSubmit={handleJoinWaitlist} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto pt-4">
             <Input 
