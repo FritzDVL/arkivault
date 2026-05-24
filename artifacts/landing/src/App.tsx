@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import NotFound from "@/pages/not-found";
 import ObsidianLogo from "@assets/obsidian-logo.svg";
-import ArkivLogo from "@assets/arkiv-logo.svg";
 
 const queryClient = new QueryClient();
 
@@ -416,20 +415,6 @@ const notes = result.entities.map(e =>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-6 border-t border-border bg-white text-sm font-mono">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <img src={ArkivLogo} alt="Arkiv" className="h-4 opacity-50 grayscale" />
-            <span>Built during ETHGlobal.</span>
-          </div>
-          <div className="flex gap-6 text-muted-foreground">
-            <a href="https://arkiv.network" className="hover:text-primary transition-colors">Arkiv L3</a>
-            <a href="#" className="hover:text-primary transition-colors">GitHub</a>
-            <a href="#" className="hover:text-primary transition-colors">Twitter</a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
