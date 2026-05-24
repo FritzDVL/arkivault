@@ -4,7 +4,7 @@ import { contentHash, decryptUtf8, encryptUtf8, noteIdFromPath } from "./crypto"
 import type { PluginSettings } from "./settings";
 import type { SyncLog } from "./sync-log";
 
-export type SyncState = "idle" | "syncing" | "error" | "no-wallet";
+export type SyncState = "synced" | "syncing" | "error" | "offline" | "no-wallet";
 
 interface NoteEnvelope {
   path: string;
@@ -24,8 +24,17 @@ export class SyncEngine {
   private pendingTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private lastHashByPath = new Map<string, string>();
   private inflight = 0;
+  /** Sticky failure flag — cleared only when a subsequent push or pull succeeds. */
+  private lastErrorKind: "offline" | "error" | null = null;
 
   constructor(private readonly deps: SyncEngineDeps) {}
+
+  private clearError() {
+    if (this.lastErrorKind !== null) {
+      this.lastErrorKind = null;
+      this.emit();
+    }
+  }
 
   scheduleAutoPush(file: TFile) {
     const s = this.deps.settings();
@@ -104,6 +113,7 @@ export class SyncEngine {
           latestByNoteId.set(nid, e);
         }
       }
+      this.clearError();
       for (const e of latestByNoteId.values()) {
         try {
           const decoded = decryptUtf8(e.payload, s.privateKey);
@@ -173,6 +183,7 @@ export class SyncEngine {
         entityKey: result.entityKey,
         txHash: result.txHash,
       });
+      this.lastErrorKind = null;
       if (!opts?.silent) new Notice(`Synced "${file.name}" to Arkiv`);
       return "pushed";
     } finally {
@@ -204,6 +215,9 @@ export class SyncEngine {
   private recordError(subject: string, err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     this.deps.log.add({ type: "error", file: subject, message });
+    // Classify network/RPC failures as "offline" so the status bar communicates
+    // recoverable connectivity issues distinctly from logic errors.
+    this.lastErrorKind = isNetworkError(err) ? "offline" : "error";
     new Notice(`Arkiv sync error on ${subject}: ${message}`);
     this.emit();
   }
@@ -213,10 +227,28 @@ export class SyncEngine {
     const pending = this.pendingTimers.size + this.inflight;
     if (!arkiv) {
       this.deps.onStateChange("no-wallet", pending);
-    } else if (pending > 0) {
-      this.deps.onStateChange("syncing", pending);
-    } else {
-      this.deps.onStateChange("idle", 0);
+      return;
     }
+    if (pending > 0) {
+      this.deps.onStateChange("syncing", pending);
+      return;
+    }
+    if (this.lastErrorKind === "offline") {
+      this.deps.onStateChange("offline", 0);
+      return;
+    }
+    if (this.lastErrorKind === "error") {
+      this.deps.onStateChange("error", 0);
+      return;
+    }
+    this.deps.onStateChange("synced", 0);
   }
+}
+
+function isNetworkError(err: unknown): boolean {
+  if (!err) return false;
+  const msg = err instanceof Error ? err.message : String(err);
+  return /network|fetch|ECONN|ENOTFOUND|ETIMEDOUT|ECONNREFUSED|HTTP request failed|timeout|getaddrinfo/i.test(
+    msg,
+  );
 }

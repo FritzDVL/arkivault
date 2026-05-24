@@ -28,7 +28,7 @@ export default class OnChainSecondBrainPlugin extends Plugin {
 
     this.statusBarEl = this.addStatusBarItem();
     this.statusBarEl.addClass("ocsb-status-bar");
-    this.renderStatusBar(this.arkiv ? "idle" : "no-wallet", 0);
+    this.renderStatusBar(this.arkiv ? "synced" : "no-wallet", 0);
 
     this.registerView(
       SYNC_LOG_VIEW_TYPE,
@@ -134,7 +134,7 @@ export default class OnChainSecondBrainPlugin extends Plugin {
     } else {
       this.arkiv = null;
     }
-    this.renderStatusBar(this.arkiv ? "idle" : "no-wallet", 0);
+    this.renderStatusBar(this.arkiv ? "synced" : "no-wallet", 0);
   }
 
   private async activateLogView() {
@@ -154,7 +154,7 @@ export default class OnChainSecondBrainPlugin extends Plugin {
     this.statusBarEl.empty();
     const dot = this.statusBarEl.createSpan({ cls: `ocsb-status-dot ${state}` });
     dot;
-    let text = "Arkiv: idle";
+    let text = "Arkiv: synced";
     switch (state) {
       case "syncing":
         text = `Arkiv: syncing ${pending ?? ""}`.trim();
@@ -162,10 +162,13 @@ export default class OnChainSecondBrainPlugin extends Plugin {
       case "error":
         text = "Arkiv: error";
         break;
+      case "offline":
+        text = "Arkiv: offline";
+        break;
       case "no-wallet":
         text = "Arkiv: no wallet";
         break;
-      case "idle":
+      case "synced":
         text = "Arkiv: synced";
         break;
     }

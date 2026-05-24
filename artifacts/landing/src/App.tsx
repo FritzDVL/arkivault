@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Lock, Zap, ArrowRight, Github, Twitter, Send, Database, Wallet, Smartphone, ShieldCheck, Key } from "lucide-react";
+import { Lock, Zap, ArrowRight, Send, Database, Wallet, Smartphone, ShieldCheck, Key, Download, Copy, Check } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
@@ -29,20 +29,50 @@ const staggerContainer = {
   }
 };
 
+const INSTALL_SNIPPET = `# 1. Clone & build the plugin
+git clone https://github.com/your-fork/arkivault.git
+cd arkivault
+pnpm install
+pnpm --filter @workspace/obsidian-plugin run build
+
+# 2. Drop the build into your vault
+VAULT=/path/to/YourObsidianVault
+mkdir -p "$VAULT/.obsidian/plugins/on-chain-second-brain"
+cp artifacts/obsidian-plugin/dist/{main.js,manifest.json,styles.css} \\
+   "$VAULT/.obsidian/plugins/on-chain-second-brain/"
+
+# 3. In Obsidian: Settings → Community plugins → enable
+#    "On-Chain Second Brain", then paste a Braga testnet key.`;
+
 function Home() {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const handleJoinWaitlist = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    
+
     toast({
       title: "Waitlist joined.",
       description: "We'll notify you when the vault opens.",
     });
     setEmail("");
   };
+
+  const handleCopyInstall = async () => {
+    try {
+      await navigator.clipboard.writeText(INSTALL_SNIPPET);
+      setCopied(true);
+      toast({ title: "Install snippet copied." });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast({ title: "Couldn't copy — select manually.", variant: "destructive" });
+    }
+  };
+
+  const scrollToInstall = () =>
+    document.getElementById("install")?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-sans overflow-x-hidden selection:bg-accent selection:text-white">
@@ -59,8 +89,9 @@ function Home() {
             <a href="#architecture" className="hidden md:block hover:text-primary transition-colors font-mono uppercase text-xs">Architecture</a>
             <a href="#features" className="hidden md:block hover:text-primary transition-colors font-mono uppercase text-xs">Features</a>
             <a href="https://arkiv.network" target="_blank" rel="noreferrer" className="hidden md:block hover:text-primary transition-colors font-mono uppercase text-xs">Arkiv L3</a>
-            <Button variant="outline" className="border-border hover:bg-secondary rounded-sm h-8 px-4 font-mono text-xs uppercase" onClick={() => document.getElementById("waitlist")?.scrollIntoView({behavior: "smooth"})}>
-              Early Access
+            <a href="#install" className="hidden md:block hover:text-primary transition-colors font-mono uppercase text-xs">Install</a>
+            <Button className="rounded-sm h-8 px-4 font-mono text-xs uppercase bg-primary hover:bg-primary/90 text-white" onClick={scrollToInstall} data-testid="nav-install-cta">
+              <Download className="h-3 w-3 mr-1.5" /> Install the Plugin
             </Button>
           </div>
         </div>
@@ -94,26 +125,29 @@ function Home() {
               </span>
             </motion.p>
             
-            <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-4 pt-4">
-              <form onSubmit={handleJoinWaitlist} className="flex gap-2 max-w-md w-full">
-                <Input 
-                  type="email" 
-                  placeholder="wallet@domain.eth" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="rounded-sm border-border bg-white h-12 focus-visible:ring-primary font-mono"
-                  required
-                />
-                <Button type="submit" className="h-12 rounded-sm bg-primary hover:bg-primary/90 text-white px-8 font-mono uppercase text-sm">
-                  Init Vault
-                </Button>
-              </form>
+            <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-3 pt-4">
+              <Button
+                className="h-12 rounded-sm bg-primary hover:bg-primary/90 text-white px-8 font-mono uppercase text-sm"
+                onClick={scrollToInstall}
+                data-testid="hero-install-cta"
+              >
+                <Download className="h-4 w-4 mr-2" /> Install the Plugin
+              </Button>
+              <Button
+                variant="outline"
+                className="h-12 rounded-sm border-border hover:bg-secondary px-8 font-mono uppercase text-sm"
+                onClick={() => document.getElementById("architecture")?.scrollIntoView({ behavior: "smooth" })}
+              >
+                How it works
+              </Button>
             </motion.div>
-            
+
             <motion.div variants={fadeIn} className="pt-4 flex items-center gap-6 text-sm text-muted-foreground font-mono">
               <a href="https://arkiv.network" target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-foreground transition-colors group">
                 Read the Arkiv Litepaper <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
               </a>
+              <span className="hidden sm:inline opacity-60">·</span>
+              <span className="hidden sm:inline">Braga testnet · Desktop Obsidian</span>
             </motion.div>
           </motion.div>
         </div>
@@ -157,21 +191,24 @@ function Home() {
                   lib/sync.ts
                 </div>
                 <pre className="p-4 font-mono text-xs md:text-sm text-green-400 overflow-x-auto">
-{`import { createPublicClient, http } from "@arkiv-network/sdk";
+{`import { createWalletClient, http } from "@arkiv-network/sdk";
 import { braga } from "@arkiv-network/sdk/chains";
+import { privateKeyToAccount } from "@arkiv-network/sdk/accounts";
 
-const arkiv = createPublicClient({ 
-  chain: braga, 
-  transport: http() 
+const wallet = createWalletClient({
+  account: privateKeyToAccount(userKey),
+  chain: braga,
+  transport: http(),
 });
 
-await arkiv.arkiv.createEntity({
-  payload: encrypt(note.markdown, userPrivateKey),
-  attributes: { 
-    category: "second-brain", 
-    noteId: note.id 
-  },
-  expires_in: 2592000,
+await wallet.createEntity({
+  payload: encrypt(note.markdown, userKey),
+  attributes: [
+    { key: "category", value: "obsidian-second-brain" },
+    { key: "noteId", value: sha1(note.path) },
+  ],
+  contentType: "application/octet-stream",
+  expiresIn: 2592000,
 });`}
                 </pre>
               </div>
@@ -191,14 +228,15 @@ await arkiv.arkiv.createEntity({
                 </div>
                 <pre className="p-4 font-mono text-xs md:text-sm text-blue-400 overflow-x-auto">
 {`const result = await arkiv.buildQuery()
-  .where(eq("category", "second-brain"))
+  .where(and([eq("category", "obsidian-second-brain")]))
   .ownedBy(myWalletAddress)
   .withPayload(true)
+  .withAttributes(true)
   .fetch();
 
-// Parse entities and decrypt
-const notes = result.entities.map(e => 
-  decrypt(e.payload, userPrivateKey)
+// Group by noteId, decrypt latest payload per note
+const notes = result.entities.map(e =>
+  JSON.parse(decrypt(e.payload, userKey))
 );`}
                 </pre>
               </div>
@@ -282,6 +320,76 @@ const notes = result.entities.map(e =>
               title="Zero Lock-in"
               description="Data is standard markdown encrypted into binary payloads. It belongs to you forever, stored on unstoppable infrastructure."
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Install the Plugin */}
+      <section id="install" className="py-24 px-6 bg-[#0a0a0a] text-white border-y border-[#333]">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-12 text-center">
+            <h2 className="text-sm font-mono text-accent mb-2 uppercase tracking-widest">60-Second Install</h2>
+            <h3 className="text-3xl md:text-5xl font-bold">INSTALL THE PLUGIN</h3>
+            <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
+              Desktop Obsidian, any OS. Build the plugin, drop three files into your vault, paste a Braga testnet key.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-7 bg-[#111] border border-[#333] rounded overflow-hidden">
+              <div className="px-4 py-2 bg-[#1a1a1a] border-b border-[#333] text-xs font-mono text-gray-500 flex items-center justify-between">
+                <span>terminal</span>
+                <button
+                  type="button"
+                  onClick={handleCopyInstall}
+                  className="text-gray-400 hover:text-white transition-colors flex items-center gap-1"
+                  data-testid="install-copy"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-3 w-3" /> copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3" /> copy
+                    </>
+                  )}
+                </button>
+              </div>
+              <pre className="p-5 font-mono text-xs md:text-sm text-green-400 overflow-x-auto whitespace-pre leading-relaxed">
+{INSTALL_SNIPPET}
+              </pre>
+            </div>
+
+            <div className="lg:col-span-5 space-y-6">
+              <div className="space-y-3">
+                <div className="font-mono text-xs uppercase tracking-widest text-accent">Requirements</div>
+                <ul className="space-y-2 text-gray-300 text-sm font-mono">
+                  <li>· Desktop Obsidian 1.5+</li>
+                  <li>· Node.js 24 + pnpm 10</li>
+                  <li>· A Braga testnet wallet with a little GLM for gas</li>
+                </ul>
+              </div>
+              <div className="space-y-3">
+                <div className="font-mono text-xs uppercase tracking-widest text-accent">Generate a testnet key</div>
+                <div className="bg-[#111] border border-[#333] rounded">
+                  <pre className="p-3 font-mono text-xs text-gray-300">{`echo "0x$(openssl rand -hex 32)"`}</pre>
+                </div>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Never paste a mainnet key or a key holding real funds. The plugin signs with a raw key on disk — fine for a hackathon demo, not for production.
+                </p>
+              </div>
+              <div className="pt-2">
+                <a
+                  href="https://explorer.braga.hoodi.arkiv.network"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 text-accent hover:underline font-mono text-sm"
+                >
+                  Braga Explorer <ArrowRight className="h-3 w-3" />
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>

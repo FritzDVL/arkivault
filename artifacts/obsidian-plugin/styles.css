@@ -19,6 +19,7 @@
 .ocsb-status-dot.synced { background: #21c55d; }
 .ocsb-status-dot.syncing { background: #f59e0b; animation: ocsb-pulse 1.2s infinite ease-in-out; }
 .ocsb-status-dot.error { background: #ef4444; }
+.ocsb-status-dot.offline { background: #ef4444; opacity: 0.6; }
 .ocsb-status-dot.no-wallet { background: var(--text-muted); }
 
 @keyframes ocsb-pulse {
