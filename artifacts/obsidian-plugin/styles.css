@@ -1,0 +1,137 @@
+/* On-Chain Second Brain — plugin styles */
+
+.ocsb-status-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-monospace);
+  font-size: 12px;
+}
+
+.ocsb-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  display: inline-block;
+}
+
+.ocsb-status-dot.synced { background: #21c55d; }
+.ocsb-status-dot.syncing { background: #f59e0b; animation: ocsb-pulse 1.2s infinite ease-in-out; }
+.ocsb-status-dot.error { background: #ef4444; }
+.ocsb-status-dot.no-wallet { background: var(--text-muted); }
+
+@keyframes ocsb-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.ocsb-log-view {
+  padding: 12px;
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ocsb-log-header {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ocsb-log-wallet {
+  margin-bottom: 12px;
+  padding: 8px;
+  background: var(--background-secondary);
+  border-radius: 4px;
+  word-break: break-all;
+  color: var(--text-muted);
+}
+
+.ocsb-log-empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.ocsb-log-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.ocsb-log-entry-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ocsb-log-entry .ocsb-log-type {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.ocsb-log-entry .ocsb-log-type.push { color: #6c31e3; }
+.ocsb-log-entry .ocsb-log-type.pull { color: #1863dc; }
+.ocsb-log-entry .ocsb-log-type.error { color: #ef4444; }
+
+.ocsb-log-entry .ocsb-log-ts {
+  color: var(--text-faint);
+  font-size: 10px;
+}
+
+.ocsb-log-entry .ocsb-log-file {
+  color: var(--text-normal);
+}
+
+.ocsb-log-entry .ocsb-log-meta {
+  color: var(--text-muted);
+  font-size: 10px;
+  word-break: break-all;
+}
+
+.ocsb-log-entry .ocsb-log-meta a {
+  color: var(--text-accent);
+}
+
+.ocsb-settings-warning {
+  border: 1px solid #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+  padding: 12px;
+  border-radius: 4px;
+  margin: 16px 0;
+  font-size: 13px;
+  color: var(--text-normal);
+}
+
+.ocsb-settings-warning strong { color: #ef4444; }
+
+.ocsb-settings-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 24px 0 8px;
+}
+
+.ocsb-settings-derived {
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  color: var(--text-muted);
+  word-break: break-all;
+  padding: 8px;
+  background: var(--background-secondary);
+  border-radius: 4px;
+}

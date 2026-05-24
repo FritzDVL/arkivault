@@ -1,0 +1,10 @@
+{
+  "id": "on-chain-second-brain",
+  "name": "On-Chain Second Brain",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Sync your vault to the Arkiv L3 — no server, no Supabase, no Firebase. Encrypted by your key, owned by your wallet.",
+  "author": "Arkivault Hackathon",
+  "authorUrl": "https://arkiv.network",
+  "isDesktopOnly": true
+}

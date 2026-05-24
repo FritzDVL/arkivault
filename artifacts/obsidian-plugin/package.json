@@ -1,0 +1,20 @@
+{
+  "name": "@workspace/obsidian-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "On-Chain Second Brain — Obsidian plugin that syncs your vault to Arkiv L3.",
+  "scripts": {
+    "build": "node esbuild.config.mjs production && node scripts/copy-assets.mjs",
+    "dev": "node esbuild.config.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@arkiv-network/sdk": "0.6.8"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "esbuild": "0.27.3",
+    "obsidian": "1.12.3",
+    "typescript": "5.9.3"
+  }
+}
