@@ -9,7 +9,7 @@ by your Ethereum address. Every device reads and writes directly to Arkiv via
 RPC — there is no API to host, no database to rent, no third party that can
 read your notes.
 
-Built for the ETHGlobal × Ethereum hackathon.
+Built for the [Network School (NS) × Arkiv](https://www.ethns.io/) hackathon.
 
 ---
 
@@ -200,7 +200,7 @@ Tracked as project tasks in the repo:
 
 Built on [Arkiv](https://arkiv.network) using
 [`@arkiv-network/sdk`](https://www.npmjs.com/package/@arkiv-network/sdk).
-Made for the ETHGlobal × Ethereum hackathon.
+Made for the [Network School (NS) × Arkiv](https://www.ethns.io/) hackathon.
 
 ## License
 
