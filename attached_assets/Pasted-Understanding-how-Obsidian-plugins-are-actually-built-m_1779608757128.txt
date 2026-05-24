@@ -1,0 +1,95 @@
+Understanding how Obsidian plugins are actually built makes realizing your "on-chain second brain" incredibly straightforward.
+
+Under the hood, **Obsidian is an Electron app**. This means it runs on standard web technologies: Chromium (for rendering the UI) and Node.js (for interacting with your local file system). Because it runs a Node.js runtime natively, **an Obsidian plugin is just a standard JavaScript/TypeScript module.**
+
+This makes it ridiculously easy to integrate with Arkiv, because the exact same Arkiv TypeScript SDK you use for a web app can run straight inside an Obsidian plugin.
+
+---
+
+## What an Obsidian Plugin Actually Looks Like
+
+If you open the `.obsidian/plugins/` folder in any vault, every community plugin consists of just three files:
+
+* `manifest.json`: Tells Obsidian the plugin's name, ID, version, and author.
+* `main.js`: The entire compiled JavaScript code bundle of the plugin.
+* `styles.css` *(Optional)*: Custom styling for the plugin's UI components.
+
+Developers generally use Obsidian's official TypeScript starter template, write their code, and bundle it into that single `main.js` file using a bundler like **esbuild**.
+
+---
+
+## How Plugins Hook Into Your Notes
+
+The Obsidian API exposes an `onload()` method that acts as the entry point when the app opens. From there, plugins use a few core event listeners to interact with your data:
+
+```typescript
+import { Plugin, TFile } from 'obsidian';
+
+export default class ArkivSyncPlugin extends Plugin {
+  async onload() {
+    console.log('Arkiv Sync Plugin Loaded!');
+
+    // 1. Listen for whenever a user modifies a file
+    this.registerEvent(
+      this.app.vault.on('modify', async (file: TFile) => {
+        // Read the absolute local markdown text
+        const content = await this.app.vault.read(file);
+        
+        // Parse the metadata frontmatter (tags, titles, etc.)
+        const cache = this.app.metadataCache.getFileCache(file);
+        
+        // -> Right here is where you fire your Arkiv SDK payload!
+        console.log(`Ready to push "${file.name}" to Arkiv L3 DB-Chain...`);
+      })
+    );
+  }
+}
+
+```
+
+---
+
+## Making It Reality for Your Hackathon Submission
+
+Since the deadline is tomorrow, trying to build, test, and debug a native desktop plugin inside Obsidian's environment can consume precious hours.
+
+Instead, you can use a clever "hackathon shortcut" that simulates exactly how the plugin works without dealing with the Obsidian API overhead.
+
+### The Fast Alternative: The "Local Folder Watcher"
+
+Instead of writing an actual plugin, write a simple **Node.js CLI script** using a library like `chokidar`. It runs in your terminal, watches your local Obsidian Vault folder, and triggers the Arkiv code every time a markdown file changes.
+
+```javascript
+import chokidar from 'chokidar';
+import fs from 'fs';
+import { saveNoteToBlockchain } from './lib/syncNote'; // Your Arkiv sync logic
+
+// Point it to your actual Obsidian Vault path
+const vaultPath = '/Users/yourname/Documents/ObsidianVault';
+
+console.log(`Watching your Obsidian Brain at: ${vaultPath}`);
+
+chokidar.watch(vaultPath, { ignored: /(^|[\/\\])\../ }).on('change', async (path) => {
+  if (path.endsWith('.md')) {
+    const content = fs.readFileSync(path, 'utf-8');
+    console.log(`File changed: ${path}. Syncing to Arkiv...`);
+    
+    // Send it to the L3 decentralized data layer
+    await saveNoteToBlockchain("0xYourWalletAddress", {
+      id: path,
+      title: path.split('/').pop(),
+      content: content,
+      tags: ['auto-sync']
+    });
+  }
+});
+
+```
+
+### Why this is a great pitch:
+
+In your hackathon video and documentation, you can confidently explain:
+
+> *"To ensure a rapid proof-of-concept for the build window, I built a local Node.js folder watcher. Because Obsidian is built on Node.js and local Markdown, this exact codebase maps 1:1 into a native Obsidian desktop plugin class."*
+
+Judges love when developers understand the underlying environment. It proves your project is highly feasible and ready to become a real production plugin right after the hackathon wraps up.
